@@ -11,7 +11,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery, BufferedInputFile
 from openai import AsyncOpenAI
 
-from bot.keyboards.inline_keyboards import crete_inline_keyboard_ready
+from bot.keyboards.inline_keyboards import crete_inline_keyboard_ready, crete_inline_keyboard_assistants
 from bot.lexicon.errors import wrong_format
 from bot.lexicon.prompts import assistants
 from bot.lexicon.waiting import waiting_words
@@ -25,7 +25,7 @@ from utils.validation import validate_url
 
 router = Router()
 
-docs = {}
+
 
 
 @router.callback_query(F.data == "contract")
@@ -65,7 +65,7 @@ async def process_contract_recognize(message: Message, bot: Bot, openai_client: 
                                            client=openai_client,
                                            system_prompt=assistants['contract']['system_prompt'],
                                            user_prompt=assistants['contract']['user_prompt'])
-        await message.answer(text=response)
+        await message.answer(text=response,reply_markup=crete_inline_keyboard_assistants())
         await state.clear()
 
 
@@ -93,6 +93,7 @@ async def process_load_partaily(message: Message, bot: Bot, openai_client: Async
 )
 async def process_compare(callback_query: CallbackQuery, bot: Bot, openai_client: AsyncOpenAI, state: FSMContext, ):
     print("lf")
+    option_keyboard = crete_inline_keyboard_assistants()
     await callback_query.answer()  # Закрываем уведомление о нажатии кнопки
     data = await state.get_data()
     documents = data.get('documents', [])
@@ -123,6 +124,7 @@ async def process_compare(callback_query: CallbackQuery, bot: Bot, openai_client
         await bot.send_document(
             chat_id=callback_query.message.chat.id,
             document=BufferedInputFile(file=response.encode("utf-8"), filename="Документ"),
+            reply_markup=option_keyboard
 
         )
 
