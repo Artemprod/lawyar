@@ -1,0 +1,26 @@
+version: "3.8"
+services:
+
+  redis_estelisto:
+    image: redis
+    ports:
+      - "32768:32768"
+    restart: always
+    volumes:
+      - redis_estelisto:/DB/Redis/admin/data/db
+    command: [ "redis-server", "--port", "32768" ]
+
+
+  insight_telegram_admin:
+    image: docker.io/artemprod/estelisto:${IMAGE_TAG:-latest} # удобно чтобы посомтреть чтобы соответсвовать коммиту
+    restart: always
+    env_file:
+      - .env
+    depends_on:
+      - redis_estelisto
+
+
+
+volumes:
+  redis_estelisto:
+
